@@ -1,0 +1,15 @@
+language: c
+compiler:
+  - gcc
+stages:
+  - code
+  - build
+  - test
+jobs:
+  include:
+    - stage: code
+      script: gcc 
+    - stage: build
+      script: make all
+    - stage: test
+      script: ./runExample.sh
