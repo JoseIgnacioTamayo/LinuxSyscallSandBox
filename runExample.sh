@@ -87,3 +87,5 @@ echo ------------------------- Running STRACE on the same commands, to compare--
 strace -c bin/tests/testLibPID
 strace -c bin/tests/testLibIO
 strace -c -f bin/tests/testFork
+
+exit 0

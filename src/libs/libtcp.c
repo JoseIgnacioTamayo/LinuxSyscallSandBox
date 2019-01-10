@@ -3,20 +3,20 @@
 	\authors Ignacio Tamayo
 	\date June 11th 2016
 	\version 1.0
-	
+
 	* When SENDTO, all the UpperCase and LowerCase are inverted
 	* When RCVFROM, all numbers are replaced by '0'
 	* When BIND, the Port is shifted some offset if it is >1024. This allows to fool the Server that thinks it has obtained a priviledged port
-	
+
 	It uses read_memory_byte()/write_memory_byte()), so it has to be compiled
 	\code
-		gcc -c  -fPIC   libs/libio.c 
-		gcc -c  -fPIC   libSandboxHelper.c 
-		gcc -shared  -nostdlib  -o libio.so libio.o  libSandboxHelper.o  
+		gcc -c  -fPIC   libs/libio.c
+		gcc -c  -fPIC   libSandboxHelper.c
+		gcc -shared  -nostdlib  -o libio.so libio.o  libSandboxHelper.o
 	\endcode
-	
-	\see sandbox.c 
-	
+
+	\see sandbox.c
+
 */
 
 /*
@@ -35,7 +35,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTH
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  * */
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -43,6 +43,7 @@ SOFTWARE.
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
+#include <ctype.h>
 
 #include "sandbox_customsyscall_descriptor.h"
 
@@ -53,7 +54,7 @@ SOFTWARE.
 
 #define BUFFER_LENGTH	512
 
- 
+
 /*! Tracee Descriptor*/
 tracee_descriptor* CUSTOM_TRACEE_DESCRIPTOR = NULL;
 
@@ -63,10 +64,10 @@ tracee_descriptor* CUSTOM_TRACEE_DESCRIPTOR = NULL;
 ssize_t mywrite(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen)
 {
 	 //Cannot touch the buffer as it belongs to another process and it would be invading memory
-	
+
 	 int i = len;
 	 char buffer[BUFFER_LENGTH],*c;
-	
+
 	if ( i >1 )
 	{
 		if (i > BUFFER_LENGTH ) i = BUFFER_LENGTH;
@@ -76,7 +77,7 @@ ssize_t mywrite(int sockfd, const void *buf, size_t len, int flags, const struct
 			c = buffer + i;
 			while( c>=buffer )
 			{
-				if( isalpha(*c) ) 
+				if( isalpha(*c) )
 				{
 					*c = islower(*c) ? toupper(*c) : tolower(*c);
 				}
@@ -98,7 +99,7 @@ ssize_t myread(int sockfd, void *buf, size_t len, int flags, struct sockaddr *sr
 	//We get the bytes actually read by the kernel
 	 int i = CUSTOM_TRACEE_DESCRIPTOR->kernel_return_value;
 	 char buffer[BUFFER_LENGTH],*c;
-	
+
 	if ( i >=0 )
 	{
 		if (i > BUFFER_LENGTH ) i = BUFFER_LENGTH;
@@ -107,7 +108,7 @@ ssize_t myread(int sockfd, void *buf, size_t len, int flags, struct sockaddr *sr
 			c = buffer + i;
 			while(c >= buffer)
 			{
-				if( isdigit(*c) ) 
+				if( isdigit(*c) )
 				{
 					*c = '0';
 				}
@@ -117,7 +118,7 @@ ssize_t myread(int sockfd, void *buf, size_t len, int flags, struct sockaddr *sr
 		}
 	}
 	return len;
-	
+
 }
 
 
@@ -137,7 +138,7 @@ int mybind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 			port = (port < TCP_PORT_LIMIT) ? port+TCP_PORT_SHIFT : port;
 			socket_address.sin_port = htons(port);
 			write_memory_byte( CUSTOM_TRACEE_DESCRIPTOR->trace_PID , (void*)addr, (void*)&socket_address,  sizeof(struct sockaddr_in));
-		}	
+		}
 	}
 	return 0;
 }
@@ -158,12 +159,12 @@ int unbind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 			port = ( (port -TCP_PORT_SHIFT) <  TCP_PORT_LIMIT) ? port-TCP_PORT_SHIFT : port;
 			socket_address.sin_port = htons(port);
 			write_memory_byte( CUSTOM_TRACEE_DESCRIPTOR->trace_PID , (void*)addr, (void*)&socket_address,  sizeof(struct sockaddr_in));
-		}	
+		}
 	}
 	return 0;
 }
-         
-#ifdef __x86_64__	
+
+#ifdef __x86_64__
 	#define RCVFROM_SYSCALL_NUMBER 45
 	#define SENDTO_SYSCALL_NUMBER 44
 	#define BIND_SYSCALL_NUMBER 49
@@ -171,7 +172,7 @@ int unbind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 
 
 /*! Array of Structures, one per custom syscall*/
-custom_syscall_descriptor custom_syscalls_array_1[] = { 
+custom_syscall_descriptor custom_syscalls_array_1[] = {
 [RCVFROM_SYSCALL_NUMBER] = {
 		NULL,
 		(long int (*)())myread,

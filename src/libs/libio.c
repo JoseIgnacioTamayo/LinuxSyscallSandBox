@@ -3,20 +3,20 @@
 	\authors Ignacio Tamayo
 	\date April 24th 2016
 	\version 1.2
-	
+
 	This is a sniffer For the READ and Write operations, all is captured and copied to the files:
-	* 
+	*
 	* /tmp/Sandbox.read, /tmp/Sandbox.write
-	
+
 	It uses read_memory_byte(), so it has to be compiled
 	\code
-		gcc -c  -fPIC   libs/libio.c 
-		gcc -c  -fPIC   libSandboxHelper.c 
-		gcc -shared  -nostdlib  -o libio.so libio.o  libSandboxHelper.o  
+		gcc -c  -fPIC   libs/libio.c
+		gcc -c  -fPIC   libSandboxHelper.c
+		gcc -shared  -nostdlib  -o libio.so libio.o  libSandboxHelper.o
 	\endcode
-	
+
 	\see sandbox.c libSandboxHelper.c
-	
+
 */
 
 /*
@@ -35,42 +35,44 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTH
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  * */
- 
- 
-#include <sys/types.h> 
+
+
+#include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
- #include <fcntl.h>
- #include <string.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+
 
 #include "sandbox_customsyscall_descriptor.h"
 
 #define LOCAL_TEMP_FILE_READ "/tmp/Sandbox.read"
 #define LOCAL_TEMP_FILE_WRITE "/tmp/Sandbox.write"
 
-#define BUFFER_LENGTH	64		
+#define BUFFER_LENGTH	64
 
 
  int snifferWR;	//!< File object for the Write syscalls
  int snifferRD;	//!< File object for the Read syscalls
- 
- 
+
+
 /*! Tracee Descriptor*/
 tracee_descriptor* CUSTOM_TRACEE_DESCRIPTOR = NULL;
 
 /** Writes to a local file all the write values, up to a certain amount of bytes.
- * 
+ *
  * Call BEFORE kernel, keep Kernel Result.
- * 
+ *
  * File output is LOCAL_TEMP_FILE_WRITE, BUFFER_LENGTH is the max amount of bytes to sniff.
  * */
 ssize_t mywrite(int fd, const void *buf, size_t count)
 {
 	 //Cannot touch the buffer as it belongs to another process and it would be invading memory
-	
+
 	 int i;
 	 char buffer[BUFFER_LENGTH];
-	
+
 	 if (snifferWR)
 	 {
 			memset(buffer, 0, BUFFER_LENGTH);
@@ -90,21 +92,21 @@ ssize_t mywrite(int fd, const void *buf, size_t count)
 
 
 /** writes to a local file all the read values, up to a certain amount of bytes.
- * 
+ *
  * Call AFTER kernel, keep Kernel Result.
- * 
+ *
  * File output is LOCAL_TEMP_FILE_READ, BUFFER_LENGTH is the max amount of bytes to sniff.
- * 
+ *
  * */
 ssize_t myread(int fd, const void *buf, size_t count)
  {
 	//Cannot touch the buffer as it belongs to another process and it would be invading memory
 	int i;
 	 char buffer[BUFFER_LENGTH];
-	
+
 	  if  ( (snifferRD)  )
 	 {
-			
+
 								//printf("TraceePID : %d \n",44);
 			memset(buffer, 0, BUFFER_LENGTH);
 			sprintf(buffer,"Reading %d bytes from %d : ",(int) CUSTOM_TRACEE_DESCRIPTOR->kernel_return_value ,fd);
@@ -135,11 +137,11 @@ void end(void)
 }
 
 
-#ifdef __x86_64__	
+#ifdef __x86_64__
 	#define READ_SYSCALL_NUMBER 0
 	#define WRITE_SYSCALL_NUMBER 1
 #endif
-#ifdef __i386__	
+#ifdef __i386__
 	#define READ_SYSCALL_NUMBER 3
 	#define WRITE_SYSCALL_NUMBER 4
 #endif
@@ -147,7 +149,7 @@ void end(void)
 
 
 /*! Array of Structures, one per custom syscall*/
-custom_syscall_descriptor custom_syscalls_array_1[] = { 
+custom_syscall_descriptor custom_syscalls_array_1[] = {
 [READ_SYSCALL_NUMBER] = {
 		NULL,
 		(long int (*)())myread,

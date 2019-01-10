@@ -3,14 +3,14 @@
   	\authors Ignacio TAMAYO
 	\date Jul 22nd 2016
 	\version 1.0
-	  
+
     This List is a dual-chained list, with a void* pointer as data
     This is an unordered list, all the additions are appended at the end of the list
     This list allows for iteration by using seek(<position>), has_next() and get_next();
     This list should be wrapped by specific type functions no make it easier
-     
 
-	
+
+
 */
 
 #include <stdlib.h>
@@ -27,6 +27,7 @@ list* new_list()
 	L = (list *)malloc(sizeof(list));
 	L->head=L->tail=L->cursor=NULL;
 	L->counter=0;
+	return L;
 }
 
 int append_item(list* l, void * item)
@@ -65,7 +66,7 @@ int seek(list* l, int pos)
 void goto_first(list* l)
 {
 	l->cursor = l->head;
-	
+
 }
 
 void goto_last(list* l)
@@ -80,7 +81,7 @@ int has_next(list* l)
 
 void* get_previous(list* l)
 {
-	
+
 	void* data = l->cursor->data;
 	l->cursor = l->cursor->prev;
 	return data;
@@ -88,7 +89,7 @@ void* get_previous(list* l)
 
 void* get_next(list* l)
 {
-	
+
 	void* data = l->cursor->data;
 	l->cursor = l->cursor->next;
 	return data;
@@ -99,22 +100,22 @@ int delete_item(list* l, void *item)
 	struct node * Nnode;
 
 	if ( is_empty(l) ) return -1;
-	
+
 	Nnode = l->head;
-	
+
 	while(Nnode)
 	{
 		if (Nnode->data == item)
 			break;
-		else 
+		else
 			Nnode=Nnode->next;
 	}
 	if (Nnode == NULL)
 		return -1;		//Not found
-		
+
 	if (Nnode == l->head)
 	{
-		
+
 		l->head = l->head->next;
 		if (l->head != NULL)
 			l->head->prev = NULL;
@@ -126,7 +127,7 @@ int delete_item(list* l, void *item)
 	}
 	else if (Nnode == l->tail)
 	{
-		
+
 		l->tail = l->tail->prev;
 		if (l->tail != NULL)
 			l->tail->next = NULL;
@@ -141,7 +142,7 @@ int delete_item(list* l, void *item)
 		(Nnode->prev)->next = Nnode->next;
 		(Nnode->next)->prev = Nnode->prev;
 	}
-	
+
 	free(Nnode);
 	l->counter--;
 	return 0;

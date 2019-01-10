@@ -1,6 +1,6 @@
 /*! \file dynlib.h
     \brief Functions dedicated to loading the dynamic libraries, handling their pointers and calling functions inside
-	
+
 	\authors Ignacio TAMAYO and Vassanthaphrya VIJAYAN
 	\date August 2016
 	\version 1.4
@@ -10,7 +10,7 @@
 	\internal
 	The dynlib.c allocates the global variables mentioned here
  */
- 
+
  /*
  Licence
 --------------
@@ -27,7 +27,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTH
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  * */
- 
+
 
 #ifndef INC_DYNLIB	//Lock to prevent recursive inclusions
 #define INC_DYNLIB
@@ -35,18 +35,18 @@ SOFTWARE.
 #include "sandbox_customsyscall_descriptor.h"
 #include "list.h"
 
-			
+
 
 /** List of pointers to library descriptors */
-extern list* custom_libs_list;	
+extern list* custom_libs_list;
 
-/*! Structure containting the tracee information. */ 
-extern tracee_descriptor tracee; 		
+/*! Structure containting the tracee information. */
+extern tracee_descriptor tracee;
 
 /*! Unloads the dynamic libraries, if any. Also frees the allocated memory for the custom syscall descriptors, if any.
- * 
+ *
  * While unloading, the terminate() functions of each library is called
-*/ 
+*/
 void unload_libraries();
 
 
@@ -63,10 +63,10 @@ void unload_libraries();
 int add_custom_library(char * filename);
 
 /*! Initializes the structure to hold the custom libraries
-*/ 
+*/
 void init_custom_libraries();
 
-/*! Looks if there is a custom syscall registered for execution in the library. 
+/*! Looks if there is a custom syscall registered for execution in the library.
  * Internally checks for validity of the structure, using \c is_valid_customsyscall().
  * \param syscall_number The number of the requested syscall.
  * \param library_descriptor Library where to look for the custom syscall
@@ -91,14 +91,14 @@ int is_valid_custom_library(custom_library_descriptor* library_descriptor);
  * \pre custom_syscall cannot be NULL
  * \param custom_syscall is the Descriptor to print information from
  * \internal
-*/ 
+*/
 void print_syscall_descriptor(custom_syscall_descriptor* custom_syscall );
 
 /*! Prints some values of the Custom Library Descriptors passed as parameter, if VERBOSE
  * \pre custom_library cannot be NULL
  * \param custom_library is the Descriptor to print information from
  * \internal
-*/ 
+*/
 void print_library_descriptor(custom_library_descriptor* custom_library );
 
 

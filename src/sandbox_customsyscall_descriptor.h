@@ -3,28 +3,28 @@
 	\authors Ignacio TAMAYO and Vassanthaphriya VIJAYAN
 	\date August 2016
 	\version 1.4
-	
+
 	Any CustomSyscall, in order to be executed by the Sandbox, has to be described in the structures detailed here.
-	
+
 	First, the library is identified by the structure  custom_library_descriptor.
-	
+
 	There are two possible functions to execute in the library, at loading and at unloading, to be initialized and to close resources properly.	If there is nothing to do, leave the pointer to NULL.
-	
+
 	For each custom syscall to execute, create an structure custom_syscall_descriptor.
 	There are two possible funtions per syscall, to be executed before and after the kernel.
 	If there is nothing to do, leave the pointer to NULL
-	* 
+	*
 	Several options are able to configure the way the chain of custom syscalls is executed
-	* 
+	*
 	* Finally, the structure tracee_descriptor POINTER will be linked by the Sandobox for the library to have access
 	* to information from the tracee and the execution process.
-	
+
 	\note There will have to be 2 compulsory elements, please have them in the same name as the MACRO:
 	\code
-	custom_library_descriptor CUSTOM_LIBRARY_DESCRIPTOR; 
-	tracee_descriptor* CUSTOM_TRACEE_DESCRIPTOR; 
+	custom_library_descriptor CUSTOM_LIBRARY_DESCRIPTOR;
+	tracee_descriptor* CUSTOM_TRACEE_DESCRIPTOR;
 	\endcode
-	
+
 	 \note	Please compile the library with the following command:
 	 \code
 	 gcc -shared -nostdlib -o <output .so file> <input .o file>
@@ -33,8 +33,8 @@
 	\remarks Architecture x32: http://docs.cs.up.ac.za/programming/asm/derick_tut/syscalls.html
 	\remarks Architecture x64: https://www.cs.utexas.edu/~bismith/test/syscalls/syscalls64_orig.html
 
-	\see dynlib.c sandbox.c 
-	
+	\see dynlib.c sandbox.c
+
 */
 
 /*
@@ -53,47 +53,47 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTH
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  * */
- 
- 
+
+
 #ifndef INC_SANDBOX_CUSTOMSYSCALL_DESC	//Lock to prevent recursive inclusions
 #define INC_SANDBOX_CUSTOMSYSCALL_DESC
 
-#ifdef __x86_64__	
+#ifdef __x86_64__
 	#define MAX_SYSCALL_INDEX 316
 #endif
-#ifdef __i386__	
+#ifdef __i386__
 	#define MAX_SYSCALL_INDEX 358
 #endif
 
 /** Kernel original syscall is not executed */
 #define	FLAG_DONT_CALL_KERNEL			2
 
-/** Skip this return value. 
+/** Skip this return value.
  * In the chain of custom syscalls, the return value of this function is not considered.
  * The last return result, either from the Kernel or another custom syscall function, is kept and passed along */
 #define	FLAG_KEEP_PREVIOUS_RETURN	8
 
-/** Abort custom execution if error. 
- * If any of the custom syscall returns a negative value, 
- * the execution of the syscall chain process is aborted for this and all next custom syscalls 
+/** Abort custom execution if error.
+ * If any of the custom syscall returns a negative value,
+ * the execution of the syscall chain process is aborted for this and all next custom syscalls
  * Then the kernel syscall is directly called or the syscall processing is returned to the tracee.*/
 #define FLAG_QUIT_IF_RETURN_NEGATIVE			16
 
 
 /**Max Characters for the name of the syscall and the library */
-#define		NAME_LENGTH	24	
+#define		NAME_LENGTH	24
 
 /*! \brief Structure that describes a custom Syscall */
-typedef struct {	
-	
+typedef struct {
+
 	long int (*custom_syscall_before)(); //!<Pointer to the function to be executed BEFORE the kernel syscall. Null if nothing to do
-	
+
 	long int (*custom_syscall_after)();	//!<Pointer to the function to be executed AFTER the kernel syscall. Null if nothing to do
-	
+
 	char name[NAME_LENGTH];		//!<Name of the custom syscall
-	
+
 	char flags;			//!<Combination of option flags. 0 if no options. Concatenate options with | .
-	} 
+	}
 custom_syscall_descriptor;
 
 /** \brief  Structure that describes a custom Library */
@@ -103,35 +103,35 @@ typedef struct {
 	custom_syscall_descriptor* syscall_descriptor_array;  //!< Pointer to the Descriptor array of the library
 	int syscall_descriptor_array_len;	  //!< Length of the Descriptor array of the library
 	char name[NAME_LENGTH];	//!< Name of the custom library
-	} 
+	}
 custom_library_descriptor;
 
 /*! \brief Structure to access some values from the TRACEE process */
 typedef struct {
-	
+
 	long int return_value;		 //!< Return value of the last custom syscall. Updated every time some function is executed
-	
+
 	long int kernel_return_value;	//!< Return value of the kernel syscall or kernel syscall. Updated when Kernel is executed, -1 if it was not executed
-	
+
 	int trace_PID;		//!< PID of the tracee process
 
 	char kernel_executed;		//!< TRUE(1) if the kernel syscall has been executed for this syscall
-	} 
+	}
 tracee_descriptor;
-	
-  	
+
+
 /** Structure for an empty Custom Syscall*/
-#define EMPTY_SYSCALL_STRUCT	{NULL,NULL,"",0} 	
+#define EMPTY_SYSCALL_STRUCT	{NULL,NULL,"",0}
 /** Structure for an empty Custom Library*/
-#define EMPTY_LIBRARY_STRUCT	{NULL,0,NULL,NULL,""} 
+#define EMPTY_LIBRARY_STRUCT	{NULL,0,NULL,NULL,""}
 /** Structure for an empty Tracee*/
-#define EMPTY_TRACEE_STRUCT	{0,0,0,0} 	
+#define EMPTY_TRACEE_STRUCT	{0,0,0,0}
 
-/*! Structure defining the library being implemented. Must be implemented in the library file. \see dynlib.c */ 
-extern custom_library_descriptor CUSTOM_LIBRARY_DESCRIPTOR; 
+/*! Structure defining the library being implemented. Must be implemented in the library file. \see dynlib.c */
+extern custom_library_descriptor CUSTOM_LIBRARY_DESCRIPTOR;
 
-/*! Structure containting the tracee information. Must remain a pointer in the library file. \see dynlib.c */ 
-extern const tracee_descriptor* CUSTOM_TRACEE_DESCRIPTOR; 
+/*! Structure containting the tracee information. Must remain a pointer in the library file. \see dynlib.c */
+extern const tracee_descriptor* CUSTOM_TRACEE_DESCRIPTOR;
 
  /** Symbols of the elements to look for in the custom library. \see dynlib.c */
 #define CUSTOM_LIBRARY_DESCRIPTOR_SYMBOL 	"custom_library"

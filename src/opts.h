@@ -1,18 +1,18 @@
 /*! \file opts.h
     \brief Functions dedicated to processing the command lines arguments
-	
+
 	Determined here the command line to call sandbox
-	* 
-	* Several libraries can be registed with the sandbox for the same syscalls. 
+	*
+	* Several libraries can be registed with the sandbox for the same syscalls.
 	* They will be called in the order they appeared in the command line
-	
-	
+
+
 	\see opts.c sandbox.c
-	
+
 	\authors Ignacio TAMAYO and Vassanthaphrya VIJAYAN
 	\date 06.05.2016
 	\version 1.4
-	\note 
+	\note
 */
 
 /*
@@ -31,7 +31,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTH
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  * */
- 
+
 
 
 #define OPTIONS_OK_CONTINUE 1
@@ -44,7 +44,7 @@ SOFTWARE.
  * \param argc number of arguments
  * \param argv array of arguments
  * \return OPTIONS_OK_CONTINUE if Sandbox can continue to trace for syscalls, OPTIONS_OK if the command was for Help, OPTIONS_ERROR_* if other errors
-*/ 
+*/
 
 int process_options(int argc, char* argv[]);
 

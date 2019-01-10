@@ -34,8 +34,6 @@
  * */
 int main()
 {
-
-	int i;
 	pid_t pid;	// The Child PID
 
 	switch (pid=fork())
@@ -54,7 +52,7 @@ int main()
 		break;
 	default:
 		printf("DarthVader is %d \n",getpid());
-		//sleep(2);	
+		//sleep(2);
 		printf("DarthVadir father is %d \n",getppid());
 		printf("DarthVader is %d \n",getpid());
 		printf("DarthVadir father is %d \n",getppid());

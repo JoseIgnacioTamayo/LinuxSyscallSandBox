@@ -3,22 +3,22 @@
 	\authors Ignacio Tamayo
 	\date June 11th 2016
 	\version 1.0
-	
+
 	This is a simple TELNET ECHO Server, that replies the received text but string inverted
-	
+
 	When there are no more clients connected, the server exits
-	 
+
 	Internally a new process is created by each connection.
 	As childs are created, the main process captures SIGCHLD signals not to leave zombie processes.
-	
+
 	If it receives "aBcD", it replies "DcBa".
 	If it receives "Q" or "q", connection with the client is closed
-	
+
 	Execute:
 	* \code
 	* ECHOserver <Port to Listen at>
 	* \endcode
-	
+
 */
 
 #include <netdb.h>
@@ -26,7 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define MAX_WAITING_CLIENTS 	5
 #define BUFFER_SIZE		256
@@ -42,7 +44,7 @@
 */
 int bind_tcp(int sock, int port, char* hostname);
 
-/** Function that interacts with the client, doing the message exchange 
+/** Function that interacts with the client, doing the message exchange
  * \param client_socket is the working socket for this connection
  */
 void  echo_server(int client_socket);
@@ -61,10 +63,10 @@ int childs = 0;  //!< Counter of childs. Used to determine when there are no mor
  */
 int main(int argc, char * argv[])
 {
-	int sock,client_sock, clilen;
-	char buffer[BUFFER_SIZE];
+	int sock,client_sock;
+	socklen_t clilen;
 	struct sockaddr_in  cli_addr;
-	int  n, opt=1;
+	int  opt=1;
 	int port;
 	pid_t pid;
 
@@ -75,17 +77,17 @@ int main(int argc, char * argv[])
 		printf("ECHOserver <TCP port to liste to>\n");
 		exit(9);
 	}
-	
+
 	port =  atoi(argv[1]);
 
 	//Register for signals
 	 if (signal(SIGCHLD, sig_handler) == SIG_ERR)
 		perror("ERROR registering for signals\n");
-  
+
 	//Create socket
 	sock = socket(AF_INET, SOCK_STREAM, 0); // Socket tipo INTERNET; STEAM=TCP
 	if (sock < 0) { 	      perror("ERROR opening socket"); 	      return 11; 	}
-	
+
 	//Set option to re-use the socket if it is taken in TimeWait states or similar states
 	setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(int));
 
@@ -94,17 +96,17 @@ int main(int argc, char * argv[])
 
 	//Listen at the new socket for new connections
 	listen(sock, MAX_WAITING_CLIENTS);
-	clilen = sizeof(cli_addr);
+	clilen = (socklen_t)sizeof(cli_addr);
 	while(1)
 	{
-		
-		
+
+
 		client_sock = accept(sock, (struct sockaddr *)&cli_addr, &clilen);
 		//---- Program stops here and does not go further until a connection comes in
 
 		printf ("Client connected\n");
 
-		//create process to do the job	
+		//create process to do the job
 		pid = fork();
 		switch(pid)
 		{
@@ -123,7 +125,7 @@ int main(int argc, char * argv[])
 				close(client_sock);
 			break;
 		}
-		
+
 	}
 
 }
@@ -134,7 +136,7 @@ int bind_tcp(int sock, int port, char* hostname)
 	/*
 	//Get protocol TCP from the system /etc/protocols
 	struct protoent * protocol;
-	protocol = getprotobyname(TCP_PROTO_NAME)	
+	protocol = getprotobyname(TCP_PROTO_NAME)
 
 	//Get service from the system /etc/protocols
 	struct servent * servicio;
@@ -152,13 +154,13 @@ int bind_tcp(int sock, int port, char* hostname)
 	address.sin_addr.s_addr = ((struct in_addr *) (host->h_addr))->s_addr;  //Getting the IP address of the host
 
 	//Naming of the socket and binding
-	return bind ( sock,  (struct sockaddr*) &address, sizeof(struct sockaddr_in));	
+	return bind ( sock,  (struct sockaddr*) &address, sizeof(struct sockaddr_in));
 }
 
 void echo_server(int client_socket){
 	int socket=client_socket, received_bytes, data_size,i;
 	char buffer[BUFFER_SIZE],c;
-	
+
 
 	bzero(buffer,BUFFER_SIZE);
 
@@ -168,8 +170,8 @@ void echo_server(int client_socket){
 	send(socket,&buffer,data_size,0);
 
 	bzero(buffer,BUFFER_SIZE);
-	
-	while(received_bytes=recv(socket,&buffer,BUFFER_SIZE,0))
+
+	while((received_bytes=recv(socket,&buffer,BUFFER_SIZE,0)))
 	{
 														//printf("%d : %s\n",socket, Request.message);
 			i = 0;
@@ -193,15 +195,15 @@ void echo_server(int client_socket){
 			send(socket,&buffer,received_bytes+2,0);
 			bzero(buffer,BUFFER_SIZE);
 	}
-		
+
 }
-	
+
 void sig_handler(int signo)
 {
 	int status;
   if (signo == SIGCHLD)
   {
-    printf("Client disconnected\n"); 
+    printf("Client disconnected\n");
     childs--;
     if (childs==0) exit(0);
     wait(&status);

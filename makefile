@@ -15,7 +15,9 @@
 GCC_INCLUDE_H = -I./src
 #>>>>>>>    -I. = ./src has the .h files
 
-GCC_COMPILE_OPTIONS = -fPIC -nostdlib
+GCC_COMPILE_WARNINGS = -Wall   -Wshadow
+### -Wstrict-prototypes -Wconversion -Wmissing-prototypes
+GCC_COMPILE_OPTIONS = -fPIC -nostdlib $(GCC_COMPILE_WARNINGS)
 # Options used to compile .c files into .o files
 #  -fPIC
 #If supported fo r the target machine, emit position-independent code, suitable for dynamic linking and avoiding any limit on the size of the global offset

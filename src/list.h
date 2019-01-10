@@ -3,19 +3,19 @@
   	\authors Ignacio TAMAYO
 	\date Jul 22nd 2016
 	\version 1.0
-	  
+
     This List is a dual-chained list, with a void* pointer as data
-    
+
     This is an unordered list, all the additions are appended at the end of the list
-    
+
     This list allows for iteration by using seek(<position>), has_next() and get_next();
-    
+
     This list should be wrapped by specific type functions no make it easier
-    
+
     The list has an internal CURSOR pointer used to iterate the list. Operated by seek() and get_next()
-    
-    
-    \code   
+
+
+    \code
 	list L;
 	int data = 10;
 	append_item(&L,&data);
@@ -28,7 +28,7 @@
 	}
 	delete_item(&L,&data);	//Delete the node that has the same DATA pointer as data (pointer, not value)
 	\endcode
-	
+
 */
 
 /*
@@ -46,10 +46,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
- * 
+ *
  * */
- 
- 
+
+
 #ifndef INC_LIST	//Lock to prevent recursive inclusions
 #define INC_LIST
 
@@ -63,18 +63,18 @@ struct node
 
 /*! \brief A list .
 */
-typedef struct { 
-	int counter ;  //!< Counts the number of elements 
+typedef struct {
+	int counter ;  //!< Counts the number of elements
 	struct node* head  ;  //!< Fist of the list
-	struct node* tail  ;  //!< Last of the list 
+	struct node* tail  ;  //!< Last of the list
 	struct node* cursor  ;  //!< Internal cursor used for iterations
-	} 
+	}
 list;
 
 /**
   \return An Empty list
 */
-list* new_list();
+list* new_list(void);
 
 /**
  \param l is the pointer to the list to check
@@ -84,66 +84,66 @@ int is_empty(list* l);
 
 
 /** Adding a not-NULL memory location item to the list.
- * 
- * The content of the item pointer is not copied into the list, only referenced. 
+ *
+ * The content of the item pointer is not copied into the list, only referenced.
  * If the data content is freed, the node will still point to the same memory address
- * 
+ *
  \param l is the pointer to the list to operate
  \param item is the pointer to the data to be contained in the node.
   \return 0 (OK) if addition was OK, -1 (ERR) if not
-  
+
 */
-int add_item(list* l, void *item);
+int append_item(list* l, void *item);
 
 
 /** Moved the internal cursor to the X position from the head of the list
- * 
+ *
  * The position annot be bigger than the amount of items in the list
- * 
+ *
  \param l is the pointer to the list to operate
  \param pos is the position from the head of the list. Between 0 and (l.counter-1)
   \return 0 if seek was OK, -1 (ERR) if not
-  
+
 */
 int seek(list* l, int pos);
 
 
 /** Starting from the current CURSOR position, check if there is a next element
- * 
+ *
  \param l is the pointer to the list to operate
   \return 0 if (true), 0 if not (FALSE)
-  
+
 */
 
 int has_next(list* l);
 
 /** Starting from the current CURSOR position, get the current data item and move the cursor one step back
- * 
+ *
  \param l is the pointer to the list to operate
   \return the memory pointer to the DATA element of the current node
-  
+
 */
 void* get_previous(list* l);
 
 
 /** Starting from the current CURSOR position, get the current data item and move the cursor one step
- * 
+ *
  \param l is the pointer to the list to operate
   \return the memory pointer to the DATA element of the current node
-  
+
 */
 void* get_next(list* l);
 
 
 /** Deleting a not-NULL memory location item to the list.
- * 
- * The exact memory location is searched for deletion. The comparison is made on memory locations, not on values 
+ *
+ * The exact memory location is searched for deletion. The comparison is made on memory locations, not on values
  * This deleted the node, does not delete the item in memory
- * 
+ *
  \param l is the pointer to the list to operate
  \param item is the pointer to the data to be searched in the node.
   \return 0 (OK) if deletion was OK, -1 (ERR) if not
-  
+
 */
 int delete_item(list* l, void *item);
 

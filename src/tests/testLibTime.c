@@ -2,16 +2,16 @@
     \brief Test program for libtime.so
   	\authors Ignacio Tamayo
 	\date May 25st 2016
-	\version 1.3 
-	
-	
-	
+	\version 1.3
+
+
+
     \code
 	./sandbox -l time testLibTime
     \endcode
-    
+
  	\see trace.h libpid.c
-	
+
 */
 
 #include <stdio.h>
@@ -26,15 +26,14 @@
  * */
 
 int main()
-{	
+{
 	time_t tm;
 	struct timespec ts;
 	struct timeval tv;
-	int i;
-	
+
 	tm = time(NULL);
 	// time(&tm);
-	
+
 	printf("Current date is %s Waiting for 5 secs\n",ctime(&tm));
 	ts.tv_sec = 5;
 	ts.tv_nsec = 500;
